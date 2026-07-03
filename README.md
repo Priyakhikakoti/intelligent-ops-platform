@@ -74,8 +74,7 @@ Ensure you have **Python 3.8+** and **Node.js 16+** installed.
 4. Start the FastAPI Uvicorn server:
    ```bash
    python -m uvicorn main:app --port 8000 --reload
-   ```
-   *The backend will run on [http://localhost:8000](http://localhost:8000).*
+   
 
 ### 2. Frontend Console Setup
 1. Navigate to the frontend directory:
@@ -89,8 +88,7 @@ Ensure you have **Python 3.8+** and **Node.js 16+** installed.
 3. Start the Vite development server:
    ```bash
    npm run dev
-   ```
-   *The UI will be accessible on [http://localhost:5173](http://localhost:5173).*
+  
 
 ---
 
