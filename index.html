@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinterest Smart Discovery Assistant</title>
+    <meta name="description" content="Visual discovery and recommendation engine prototype powered by object-level image embeddings and graph-based personalization.">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo-section">
+                <!-- Pinterest Red Logo SVG -->
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--color-pinterest)">
+                    <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.993 3.993-.283 1.194.599 2.169 1.775 2.169 2.13 0 3.769-2.247 3.769-5.491 0-2.871-2.063-4.878-5.01-4.878-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.176.267-.406.16-1.512-.704-2.457-2.914-2.457-4.69 0-3.818 2.775-7.325 7.997-7.325 4.198 0 7.461 2.992 7.461 6.991 0 4.172-2.63 7.53-6.282 7.53-1.228 0-2.383-.637-2.778-1.39l-.756 2.881c-.273 1.053-1.014 2.373-1.509 3.181C9.646 23.633 10.803 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+                </svg>
+                <h1 class="logo-text">Pinterest <span>Discovery Assistant</span></h1>
+            </div>
+
+            <div class="header-controls">
+                <div class="board-selector-wrapper" id="active-board-selector">
+                    <label for="header-board-select">Active Board (Personalization Ranker):</label>
+                    <select id="header-board-select" class="board-select">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar-initials">PA</div>
+                    <span class="username" id="username-display">Priya A.</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="workspace">
+            
+            <!-- LEFT PANEL: Image Input & Understanding -->
+            <section class="left-panel">
+                
+                <!-- PRESET SAMPLES -->
+                <div class="panel-card" id="preset-selector-card">
+                    <h2 class="panel-title">1. Select Preset Pin <span>Sample Gallery</span></h2>
+                    <div class="preset-carousel" id="preset-carousel-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- IMAGE UPLOAD / URL -->
+                <div class="panel-card" id="image-input-card">
+                    <h2 class="panel-title">2. Paste Link or Upload Image</h2>
+                    
+                    <div class="input-source-tabs">
+                        <button class="tab-btn active" id="upload-tab-btn">Upload Image</button>
+                        <button class="tab-btn" id="url-tab-btn">Pinterest Pin URL</button>
+                    </div>
+
+                    <!-- Upload Input -->
+                    <div class="upload-wrapper" id="upload-input-wrapper">
+                        <div class="dropzone" id="dropzone-area">
+                            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                            <div class="dropzone-text">
+                                <span>Choose a file</span> or drag it here
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">PNG, JPG up to 10MB</p>
+                            </div>
+                            <input type="file" id="file-input" style="display: none;" accept="image/*">
+                        </div>
+                    </div>
+
+                    <!-- URL Input -->
+                    <div class="url-input-group" id="url-input-wrapper" style="display: none;">
+                        <input type="text" class="url-input" id="url-input" placeholder="https://pinterest.com/pin/123456...">
+                        <button class="btn-search" id="btn-url-search">Analyze Pin</button>
+                    </div>
+                </div>
+
+                <!-- CANVAS DISPLAY -->
+                <div class="panel-card" id="canvas-card" style="padding: 0.75rem;">
+                    <div class="canvas-wrapper" id="canvas-container">
+                        <img id="canvas-img-element" class="canvas-image" src="" alt="Active discovery canvas">
+                        
+                        <!-- Bounding boxes will be drawn dynamically here -->
+                        
+                        <div class="canvas-instruction-overlay">
+                            Hover or click <span>Pin Nodes</span> to isolate objects
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; padding: 0 0.5rem;">
+                        <span id="calibration-status-label" style="font-size: 0.7rem; color: var(--text-muted);">Calibrate: adjust visual bounding boxes if misaligned</span>
+                        <button id="btn-calibrate-nodes" class="tab-btn" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; max-width: 120px; display: inline-block;">Edit Nodes</button>
+                    </div>
+                </div>
+
+                <!-- ANALYSIS METADATA -->
+                <div class="panel-card" id="analysis-metadata-card">
+                    <h3 class="detected-title">Pin Features Extracted</h3>
+                    <div class="analysis-attributes">
+                        <div>
+                            <div class="detected-title" style="font-size: 0.7rem; margin-bottom: 0.4rem;">Dominant Color Swatches (Click to filter):</div>
+                            <div class="color-palette" id="color-palette-container">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <div class="detected-title" style="font-size: 0.7rem; margin-bottom: 0.4rem;">Aesthetic & Tags:</div>
+                            <div class="meta-tags" id="meta-tags-container">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT PANEL: Discovery Feed -->
+            <section class="right-panel">
+                
+                <!-- FEED HEADER CONTROLS -->
+                <div class="discovery-header">
+                    <div class="feed-tabs">
+                        <button class="feed-tab active" data-tab="all">All Matches</button>
+                        <button class="feed-tab" data-tab="cheaper">Cheaper Alternatives</button>
+                        <button class="feed-tab" data-tab="premium">Premium Upgrades</button>
+                        <button class="feed-tab" data-tab="personalized">Personalized Picks</button>
+                    </div>
+                    <div class="filter-controls">
+                        <button class="comparison-counter" id="comparison-floating-counter">Compare (0)</button>
+                    </div>
+                </div>
+
+                <!-- DISCOVERY FEED MASONRY GRID -->
+                <div class="discovery-grid" id="discovery-grid-container">
+                    <!-- Populated dynamically with product cards -->
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: SAVE BOARD ASSISTANT -->
+    <div class="modal-overlay" id="save-board-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Save to Pinterest Board</h3>
+                <button class="btn-close" aria-label="Close save modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="save-assistant-box">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Our **Board Assistant** has analyzed the item's tags and suggested the best matches below:
+                    </p>
+                    <div class="board-list-picker" id="board-picker-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+                        <span class="detected-title" style="font-size:0.75rem;">Create New Board:</span>
+                        <div class="create-board-inline">
+                            <input type="text" class="url-input" id="input-create-board-inline" placeholder="e.g. Dream Dressing Room" style="padding: 0.5rem 0.75rem;">
+                            <button class="btn-search" id="btn-create-board-inline" style="padding: 0.5rem 1rem;">Create & Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PRODUCT COMPARISON -->
+    <div class="modal-overlay" id="comparison-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Side-by-Side Product Comparison</h3>
+                <button class="btn-close" aria-label="Close comparison modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="overflow-x: auto;">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Feature</th>
+                                <!-- Headers will be filled by JS based on selected products -->
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div class="toast-container" id="toast-container">
+        <!-- Toast elements spawned dynamically -->
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

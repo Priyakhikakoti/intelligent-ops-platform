@@ -1,0 +1,27 @@
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+backend/ops_platform.db
+backend/pinterest_discovery.db
+backend/__pycache__/
+
+# node
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.swp
