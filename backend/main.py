@@ -267,6 +267,16 @@ def run_telemetry_simulator():
 # Startup handler
 @app.on_event("startup")
 def startup_event():
+    # Automatically initialize database if it doesn't exist (e.g., on Render clean deploy)
+    if not os.path.exists(DB_PATH):
+        print("Database file not found. Auto-initializing SQLite tables...")
+        try:
+            from database import init_db
+            init_db()
+            print("Database successfully initialized.")
+        except Exception as e:
+            print("Failed to auto-initialize database:", e)
+
     global simulation_thread
     # Start telemetry simulator daemon thread
     simulation_thread = threading.Thread(target=run_telemetry_simulator, daemon=True)
